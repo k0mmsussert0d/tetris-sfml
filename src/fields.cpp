@@ -1,7 +1,9 @@
 #include <vector>
+#include <map>
 
 #include "fields.hpp"
-#include "const.hpp"
+#include "block.hpp"
+#include "const/colors.hpp"
 
 Fields::Fields() {
     std::vector<std::vector<COLOR>> status_matrix(
@@ -33,8 +35,18 @@ void Fields::saveBlock(Block& b) {
     }
 }
 
-std::vector<Point> Fields::getUsedFields() {
-    for (auto column : status_matrix) {
-        
+std::vector<PointColor> Fields::getUsedFields() {
+
+    std::vector<PointColor> res;
+
+    for (int i = 0; i < status_matrix.size(); ++i ) {
+        auto column = status_matrix[i];
+        for (int j = 0; j < column.size(); ++j) {
+            if (status_matrix[i][j] != NONE) {
+                res.push_back({ { i, j }, status_matrix[i][j] });
+            }
+        }
     }
+
+    return res;
 }

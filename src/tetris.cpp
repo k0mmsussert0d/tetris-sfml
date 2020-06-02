@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <time.h>
 #include <vector>
+#include <map>
 
 #include "const.hpp"
 #include "block.hpp"
@@ -13,23 +14,22 @@ using namespace sf;
 
 const std::string resourcesDir = "./resources/";
 
-void draw(RenderWindow&, Fields, Block, Sprite, Sprite);
+void draw(RenderWindow&, Fields, Block, Texture, Texture);
 
 int main() {
     RenderWindow window(VideoMode(534, 686), "Tetris");
 
     Texture tiles_texture;
-    tiles_texture.loadFromFile(resourcesDir + "tiles.png");
+    tiles_texture.loadFromFile(resourcesDir + "tiles1.png");
     Sprite s(tiles_texture);
-    s.setTextureRect(IntRect(0, 0, 30, 30));
 
     Texture bg_texture;
     bg_texture.loadFromFile(resourcesDir + "bg.png");
-    Sprite bg(bg_texture);
 
     bool rotate = false;
     DIR dx = none;
     float timer = 0, delay = 0.3;
+    srand(time(0));
 
     Clock clock;
 
@@ -40,6 +40,7 @@ int main() {
 
     while (window.isOpen()) {
 
+        s.setTextureRect(IntRect(block.color * 30, 0, 30, 30));
         float time = clock.getElapsedTime().asSeconds();
         clock.restart();
         timer += time;
@@ -55,6 +56,8 @@ int main() {
                      dx = left;
                  } else if (e.key.code == Keyboard::Right) {
                      dx = right;
+                 } else if (e.key.code == Keyboard::Down) {
+                     timer += 0.3;
                  }
             }
         }
@@ -79,7 +82,7 @@ int main() {
             block.rotate();
         }
 
-        draw(window, fields, block, bg, s);
+        draw(window, fields, block, bg_texture, tiles_texture);
 
         dx = none;
         rotate = false;
@@ -89,13 +92,26 @@ int main() {
     return 0;
 }
 
-void draw(RenderWindow& window, Fields fields, Block block, Sprite bg_sprite, Sprite block_sprite) {
+void draw(RenderWindow& window, Fields fields, Block block, Texture bg_texture, Texture block_texture) {
+    
+    Sprite bg(bg_texture);
+    
     window.clear(Color::White);
-    window.draw(bg_sprite);
+    window.draw(bg);
 
-    std::vector<Point> points = block.getPoints();
+    auto points = block.getPoints();
     for (Point p : points) {
-        block_sprite.setPosition(p.x * 30 + x_offset, p.y * 30 + y_offset);
-        window.draw(block_sprite);
+        Sprite tile(block_texture);
+        tile.setTextureRect(IntRect(block.color * 30, 0, 30, 30));
+        tile.setPosition(p.x * 30 + x_offset, p.y * 30 + y_offset);
+        window.draw(tile);
+    }
+
+    auto old_points = fields.getUsedFields();
+    for (const auto &p : old_points) {
+        Sprite old_tile(block_texture);
+        old_tile.setTextureRect(IntRect(p.color * 30, 0, 30, 30));
+        old_tile.setPosition(p.point.x * 30 + x_offset, p.point.y * 30 + y_offset);
+        window.draw(old_tile);
     }
 }

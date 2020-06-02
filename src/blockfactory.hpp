@@ -7,10 +7,9 @@
 
 class BlockFactory {
     private:
-        std::vector<Block> blocks;
+        static std::vector<Block> blocks;
     public:
-        BlockFactory();
-        Block getRandomBlock();
+        static Block getRandomBlock();
 };
 
 #endif // BLOCK_FACTORY_HPP

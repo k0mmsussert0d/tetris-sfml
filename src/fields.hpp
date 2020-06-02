@@ -5,17 +5,21 @@
 #include <map>
 
 #include "block.hpp"
-#include "const.hpp"
+#include "const/colors.hpp"
+
+struct PointColor {
+    Point point;
+    COLOR color;
+};
 
 class Fields {
     private:
         std::vector<std::vector<COLOR>> status_matrix;
-        std::map<Point, COLOR> matrix;
     public:
         Fields();
         bool validateBlock(Block&);
         void saveBlock(Block&);
-        std::vector<Point> getUsedFields();
+        std::vector<PointColor> getUsedFields();
 };
 
 #endif // FIELDS_HPP
