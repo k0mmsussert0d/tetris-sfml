@@ -3,10 +3,17 @@
 #include <vector>
 
 #include "const.hpp"
+#include "block.hpp"
+#include "fields.hpp"
+#include "blockfactory.hpp"
+#include "const/colors.hpp"
+#include "const/dirs.hpp"
 
 using namespace sf;
 
 const std::string resourcesDir = "./resources/";
+
+void draw(RenderWindow&, Fields, Block, Sprite, Sprite);
 
 int main() {
     RenderWindow window(VideoMode(534, 686), "Tetris");
@@ -26,8 +33,10 @@ int main() {
 
     Clock clock;
 
-    int n = 5;
-    Block block = figures[n];
+    Fields fields;
+
+    BlockFactory blockFactory;
+    Block block = blockFactory.getRandomBlock();
 
     while (window.isOpen()) {
 
@@ -51,7 +60,14 @@ int main() {
         }
 
         if (timer > delay) { // move block down
-            block.moveY(1);
+            if (!block.moveY(1)) { //  block hit the bottom
+                fields.saveBlock(block);
+                block = blockFactory.getRandomBlock();
+            } else if (!fields.validateBlock(block)) {  // block hit the other block
+                block.moveY(-1);
+                fields.saveBlock(block);
+                block = blockFactory.getRandomBlock();
+            }
             timer = 0;
         }
 
@@ -63,15 +79,7 @@ int main() {
             block.rotate();
         }
 
-        std::vector<Point> points = block.getPoints();
-
-        window.clear(Color::White);
-        window.draw(bg);
-
-        for (int i = 0; i < 4; i++) {
-            s.setPosition(points[i].x * 30 + x_offset, points[i].y * 30 + y_offset);
-            window.draw(s);
-        }
+        draw(window, fields, block, bg, s);
 
         dx = none;
         rotate = false;
@@ -79,4 +87,15 @@ int main() {
         window.display();
     }
     return 0;
+}
+
+void draw(RenderWindow& window, Fields fields, Block block, Sprite bg_sprite, Sprite block_sprite) {
+    window.clear(Color::White);
+    window.draw(bg_sprite);
+
+    std::vector<Point> points = block.getPoints();
+    for (Point p : points) {
+        block_sprite.setPosition(p.x * 30 + x_offset, p.y * 30 + y_offset);
+        window.draw(block_sprite);
+    }
 }
