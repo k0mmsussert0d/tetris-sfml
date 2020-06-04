@@ -20,6 +20,9 @@ class Fields {
         bool validateBlock(Block&);
         void saveBlock(Block&);
         std::vector<PointColor> getUsedFields();
+        std::vector<int> getFullLinesIndices();
+        void removeLineOfIndex(int);
+        bool removeSinglePoint(Point);
 };
 
 #endif // FIELDS_HPP

@@ -15,6 +15,12 @@ using namespace sf;
 const std::string resourcesDir = "./resources/";
 
 void draw(RenderWindow&, Fields, Block, Texture, Texture);
+void animateRemoval(RenderWindow& window, Fields fields, Texture block_texture, std::vector<int> rows_to_remove_indices);
+void draw_background(RenderWindow& window, Texture bg_texture);
+void draw_block(RenderWindow& window, Texture block_texture, Block block);
+void draw_color_points(RenderWindow& window, Texture block_texture, std::vector<PointColor> color_points);
+void draw_point(RenderWindow& window, Texture block_texture, Point point, COLOR color);
+
 
 int main() {
     RenderWindow window(VideoMode(534, 686), "Tetris");
@@ -63,7 +69,15 @@ int main() {
         }
 
         if (timer > delay) { // move block down
-            if (!block.moveY(1)) { //  block hit the bottom
+
+            auto full_lines_indices = fields.getFullLinesIndices();
+
+            if (full_lines_indices.size() > 0) {
+                // add score etc.
+                for (auto &line_index : full_lines_indices) {
+                    fields.removeLineOfIndex(line_index);
+                }
+            } else if (!block.moveY(1)) { //  block hit the bottom
                 fields.saveBlock(block);
                 block = blockFactory.getRandomBlock();
             } else if (!fields.validateBlock(block)) {  // block hit the other block
@@ -92,26 +106,63 @@ int main() {
     return 0;
 }
 
+// void animateRemoval(RenderWindow& window, Fields fields, Texture block_texture, std::vector<int> rows_to_remove_indices) {
+
+//     for (auto row : rows_to_remove_indices) {
+//         for (int i = 4, j = 5; i >= 0; --i, ++j) {
+//             Clock removal_clock;
+//             float timer = 0, delay = 0.1;
+
+//             Point l = { row, i };
+//             Point r = { row, j };
+
+//             fields.removeSinglePoint(l);
+//             fields.removeSinglePoint(r);
+
+//             auto points = fields.getUsedFields();
+
+//             draw_color_points(window, block_texture, points);
+
+//             while (timer < delay) {
+//                 timer += removal_clock.getElapsedTime().asSeconds();
+//                 removal_clock.restart();
+//             }
+
+//         } 
+//     }
+// }
+
 void draw(RenderWindow& window, Fields fields, Block block, Texture bg_texture, Texture block_texture) {
     
+    draw_background(window, bg_texture);
+    draw_block(window, block_texture, block);
+    auto old_points = fields.getUsedFields();
+    draw_color_points(window, block_texture, old_points);
+}
+
+void draw_background(RenderWindow& window, Texture bg_texture) {
     Sprite bg(bg_texture);
-    
+
     window.clear(Color::White);
     window.draw(bg);
+}
 
+void draw_block(RenderWindow& window, Texture block_texture, Block block) {
     auto points = block.getPoints();
-    for (Point p : points) {
-        Sprite tile(block_texture);
-        tile.setTextureRect(IntRect(block.color * 30, 0, 30, 30));
-        tile.setPosition(p.x * 30 + x_offset, p.y * 30 + y_offset);
-        window.draw(tile);
+    for (const auto &p : points) {
+        draw_point(window, block_texture, p, block.color);
     }
+}
 
-    auto old_points = fields.getUsedFields();
-    for (const auto &p : old_points) {
-        Sprite old_tile(block_texture);
-        old_tile.setTextureRect(IntRect(p.color * 30, 0, 30, 30));
-        old_tile.setPosition(p.point.x * 30 + x_offset, p.point.y * 30 + y_offset);
-        window.draw(old_tile);
+void draw_color_points(RenderWindow& window, Texture block_texture, std::vector<PointColor> color_points) {
+    for (const auto &p : color_points) {
+        draw_point(window, block_texture, p.point, p.color);
     }
+}
+
+void draw_point(RenderWindow& window, Texture block_texture, Point point, COLOR color) {
+    Sprite tile(block_texture);
+    tile.setTextureRect(IntRect(color * 30, 0, 30, 30));
+    tile.setPosition(point.x * 30 + x_offset, point.y * 30 + y_offset);
+    window.draw(tile);
 }
