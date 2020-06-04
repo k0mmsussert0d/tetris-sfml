@@ -15,11 +15,11 @@ using namespace sf;
 const std::string resourcesDir = "./resources/";
 
 void draw(RenderWindow&, Fields, Block, Texture, Texture);
-void animateRemoval(RenderWindow& window, Fields fields, Texture block_texture, std::vector<int> rows_to_remove_indices);
 void draw_background(RenderWindow& window, Texture bg_texture);
 void draw_block(RenderWindow& window, Texture block_texture, Block block);
 void draw_color_points(RenderWindow& window, Texture block_texture, std::vector<PointColor> color_points);
 void draw_point(RenderWindow& window, Texture block_texture, Point point, COLOR color);
+void draw_paused_text(RenderWindow& window);
 
 
 int main() {
@@ -35,6 +35,7 @@ int main() {
     bool rotate = false;
     DIR dx = none;
     float timer = 0, delay = 0.3;
+    bool pause = false;
     srand(time(0));
 
     Clock clock;
@@ -64,39 +65,48 @@ int main() {
                      dx = right;
                  } else if (e.key.code == Keyboard::Down) {
                      timer += 0.3;
+                 } else if (e.key.code == Keyboard::P) {
+                     pause = !pause;
                  }
             }
         }
 
-        if (timer > delay) { // move block down
+        if (!pause) {
+            if (timer > delay) { // move block down
 
             auto full_lines_indices = fields.getFullLinesIndices();
 
-            if (full_lines_indices.size() > 0) {
-                // add score etc.
-                for (auto &line_index : full_lines_indices) {
-                    fields.removeLineOfIndex(line_index);
+                if (full_lines_indices.size() > 0) {
+                    // add score etc.
+                    for (auto &line_index : full_lines_indices) {
+                        fields.removeLineOfIndex(line_index);
+                        draw(window, fields, block, bg_texture, tiles_texture);
+                        continue;
+                    }
+                } else if (!block.moveY(1)) { //  block hit the bottom
+                    fields.saveBlock(block);
+                    block = blockFactory.getRandomBlock();
+                } else if (!fields.validateBlock(block)) {  // block hit the other block
+                    block.moveY(-1);
+                    fields.saveBlock(block);
+                    block = blockFactory.getRandomBlock();
                 }
-            } else if (!block.moveY(1)) { //  block hit the bottom
-                fields.saveBlock(block);
-                block = blockFactory.getRandomBlock();
-            } else if (!fields.validateBlock(block)) {  // block hit the other block
-                block.moveY(-1);
-                fields.saveBlock(block);
-                block = blockFactory.getRandomBlock();
+                timer = 0;
             }
-            timer = 0;
-        }
 
-        if (dx) { // move block sideways
-            block.moveX(dx);
-        }
+            if (dx) { // move block sideways
+                block.moveX(dx);
+            }
 
-        if (rotate) { // rotate block
-            block.rotate();
+            if (rotate) { // rotate block
+                block.rotate();
+            }
         }
 
         draw(window, fields, block, bg_texture, tiles_texture);
+        if (pause) {
+            draw_paused_text(window);
+        }
 
         dx = none;
         rotate = false;
@@ -106,31 +116,6 @@ int main() {
     return 0;
 }
 
-// void animateRemoval(RenderWindow& window, Fields fields, Texture block_texture, std::vector<int> rows_to_remove_indices) {
-
-//     for (auto row : rows_to_remove_indices) {
-//         for (int i = 4, j = 5; i >= 0; --i, ++j) {
-//             Clock removal_clock;
-//             float timer = 0, delay = 0.1;
-
-//             Point l = { row, i };
-//             Point r = { row, j };
-
-//             fields.removeSinglePoint(l);
-//             fields.removeSinglePoint(r);
-
-//             auto points = fields.getUsedFields();
-
-//             draw_color_points(window, block_texture, points);
-
-//             while (timer < delay) {
-//                 timer += removal_clock.getElapsedTime().asSeconds();
-//                 removal_clock.restart();
-//             }
-
-//         } 
-//     }
-// }
 
 void draw(RenderWindow& window, Fields fields, Block block, Texture bg_texture, Texture block_texture) {
     
@@ -165,4 +150,17 @@ void draw_point(RenderWindow& window, Texture block_texture, Point point, COLOR 
     tile.setTextureRect(IntRect(color * 30, 0, 30, 30));
     tile.setPosition(point.x * 30 + x_offset, point.y * 30 + y_offset);
     window.draw(tile);
+}
+
+void draw_paused_text(RenderWindow& window) {
+    Text paused_text;
+    Font font;
+    font.loadFromFile(resourcesDir + "/DejaVuSans.ttf");
+    paused_text.setFont(font);
+    paused_text.setString("[P]aused");
+    paused_text.setCharacterSize(48);
+    paused_text.setFillColor(Color::Red);
+    paused_text.setStyle(Text::Bold);
+    paused_text.setPosition(70, 200);
+    window.draw(paused_text);
 }
