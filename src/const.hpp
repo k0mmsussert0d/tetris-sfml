@@ -16,6 +16,9 @@ const struct Const {
 
         int score_x = 357;
         int score_y = 103;
+
+        int com_x = 102;
+        int com_y = 253;
     } positions;
 } const_list;
 

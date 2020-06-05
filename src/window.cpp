@@ -36,3 +36,23 @@ void Window::drawPoint(Point point, COLOR color) {
     tile.setPosition(point.x * const_list.point_size + const_list.x_offset, point.y * const_list.point_size + const_list.y_offset);
     window.draw(tile);
 }
+
+void Window::displayGameStart() {
+    displayMsg("pressenter.png");
+}
+
+void Window::displayPause() {
+    displayMsg("paused.png");
+}
+
+void Window::displayGameOver() {
+    displayMsg("gameover.png");
+}
+
+void Window::displayMsg(std::string filename) {
+    sf::Texture msg_text;
+    msg_text.loadFromFile(const_list.resources_dir + "/" + filename);
+    sf::Sprite msg(msg_text);
+    msg.setPosition(const_list.positions.com_x, const_list.positions.com_y);
+    window.draw(msg);
+}

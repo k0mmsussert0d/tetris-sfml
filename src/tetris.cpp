@@ -24,7 +24,7 @@ int main() {
     bool rotate = false;
     DIR dx = none;
     float timer = 0, delay = 0.3;
-    bool pause = false;
+    bool game_paused = false, game_started = false, game_over = false;
     srand(time(0));
 
     sf::Clock clock;
@@ -56,12 +56,18 @@ int main() {
                  } else if (e.key.code == sf::Keyboard::Down) {
                      timer += 0.3;
                  } else if (e.key.code == sf::Keyboard::P) {
-                     pause = !pause;
+                     if (game_started) {
+                         game_paused = !game_paused;
+                     }
+                 } else if (e.key.code == sf::Keyboard::Enter) {
+                     if (!game_started) {
+                         game_started = true;
+                     }
                  }
             }
         }
 
-        if (!pause) {
+        if (!game_paused && game_started && !game_over) {
             if (timer > delay) { // move block down
 
             auto full_lines_indices = fields.getFullLinesIndices();
@@ -98,21 +104,26 @@ int main() {
             }
         }
 
-        window.drawBackground();
-        window.drawColorPoints(fields.getUsedFields());
-        window.drawBlock(block);
-        window.refreshWindow();
 
+        if (!game_started) {
+            window.drawBackground();
+            window.displayGameStart();
+        } else {
+            window.drawBackground();
+            window.drawColorPoints(fields.getUsedFields());
+            window.drawBlock(block);
+        }
+
+        if (game_paused) {
+            window.displayPause();
+        }
+        
         gameStats.printStatsToWindow(renderWindow);
         
-        if (pause) {
-            // draw_paused_text(renderWindow);
-        }
+        window.refreshWindow();
 
         dx = none;
         rotate = false;
-
-        renderWindow.display();
     }
     return 0;
 }
