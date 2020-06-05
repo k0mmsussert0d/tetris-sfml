@@ -62,7 +62,7 @@ void GameStats::printStatsToWindow(sf::RenderWindow& window) {
 }
 
 void GameStats::printScore(sf::RenderWindow& window) {
-    printNumber(window, std::string(6 - std::to_string(score).length(), '0') + std::to_string(score), const_list.positions.score_x, const_list.positions.score_y);
+    printNumber(window, std::string(5 - std::to_string(score).length(), '0') + std::to_string(score), const_list.positions.score_x, const_list.positions.score_y);
 }
 
 void GameStats::printLevel(sf::RenderWindow& window) {
