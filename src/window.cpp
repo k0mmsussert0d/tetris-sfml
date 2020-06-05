@@ -37,6 +37,58 @@ void Window::drawPoint(Point point, COLOR color) {
     window.draw(tile);
 }
 
+void Window::displayGameStats(GameStats game_stats) {
+    displayScore(std::to_string(game_stats.getScore()));
+    displayLevel(std::to_string(game_stats.getLevel()));
+    displayLinesCleared(std::to_string(game_stats.getLinesCleared()));
+}
+
+void Window::displayScore(std::string score) {
+    displayNumber(std::string(5 - score.length(), '0') + score, const_list.positions.score_x, const_list.positions.score_y);
+}
+
+void Window::displayLevel(std::string level) {
+    displayNumber(level, const_list.positions.level_x, const_list.positions.level_y);
+}
+
+void Window::displayLinesCleared(std::string lines_cleared) {
+    displayNumber(lines_cleared, const_list.positions.lines_x, const_list.positions.lines_y);
+}
+
+void Window::displayNumber(std::string number, float x_pos, float y_pos) {
+    for (const auto &c : number) {
+        auto i = &c - &number[0];
+        sf::Texture num_texture;
+        num_texture.loadFromFile(const_list.resources_dir + "/nums/" + c + ".png");
+        sf::Sprite num_sprite(num_texture);
+        num_sprite.setPosition(x_pos + i * const_list.point_size, y_pos);
+        window.draw(num_sprite);
+    }
+}
+
+void Window::animateLineRemoval(Fields fields, GameStats game_stats, std::vector<int> lines_to_remove) {
+    sf::Clock clock;
+    float timer = 0, remove_delay = 0.1;
+
+    for (int i = 4, j = 5; i >= 0; --i, ++j) {
+        for (const auto &l : lines_to_remove) {
+            timer = 0;
+            Point left { l, i };
+            Point right { l, j };
+            fields.removeSinglePoint(left);
+            fields.removeSinglePoint(right);
+        }
+        drawBackground();
+        displayGameStats(game_stats);
+        drawColorPoints(fields.getUsedFields());
+        refreshWindow();
+        while (timer < remove_delay) {
+            clock.restart();
+            timer += clock.getElapsedTime().asSeconds();
+        }
+    }
+}
+
 void Window::displayGameStart() {
     displayMsg("pressenter.png");
 }

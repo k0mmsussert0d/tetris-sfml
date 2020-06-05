@@ -19,6 +19,10 @@ int GameStats::getTime() {
     return time;
 }
 
+int GameStats::getLinesCleared() {
+    return lines;
+}
+
 void GameStats::addLinesCleared(int n) {
     addScore(n);
     int old_lines = lines;

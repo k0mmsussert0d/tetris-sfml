@@ -22,7 +22,7 @@ int main() {
 
     Window window(renderWindow, bg_texture, tiles_texture);
 
-    bool rotate = false, speed_up = false;
+    bool rotate = false, speed_up = false, block_needed = false;
     DIR dx = none;
     float step_timer = 0, move_timer = 0, delay = 0.3;;
     bool game_paused = false, game_started = false, game_over = false;
@@ -79,7 +79,10 @@ int main() {
         if (game_started && !game_paused && !game_over) {
             if (step_timer > delay) { // move block down
 
-                auto full_lines_indices = fields.getFullLinesIndices();
+                if (block_needed) {
+                    block = blockFactory.getRandomBlock();
+                    block_needed = false;
+                }
 
                 if (!fields.validateBlock(block)) { // block hit the other block at its start position
                     std::vector<Point> block_points = block.getPoints();
@@ -90,7 +93,10 @@ int main() {
                     }
                 }
 
-                if (full_lines_indices.size() > 0) {
+                auto full_lines_indices = fields.getFullLinesIndices();
+
+                if (full_lines_indices.size() > 0) { // full line(s) found
+                    window.animateLineRemoval(fields, gameStats, full_lines_indices);
                     gameStats.addLinesCleared(full_lines_indices.size());
 
                     for (auto &line_index : full_lines_indices) {
@@ -104,11 +110,11 @@ int main() {
                     continue;
                 } else if (!block.moveY(1)) { // block hit the bottom
                     fields.saveBlock(block);
-                    block = blockFactory.getRandomBlock();
+                    block_needed = true;
                 } else if (!fields.validateBlock(block)) {  // block hit the other block from top
                     block.moveY(-1);
                     fields.saveBlock(block);
-                    block = blockFactory.getRandomBlock();
+                    block_needed = true;
                 }
                 step_timer = 0;
             }
@@ -148,7 +154,7 @@ int main() {
             window.displayGameOver();
         }
         
-        gameStats.printStatsToWindow(renderWindow);
+        window.displayGameStats(gameStats);
         
         window.refreshWindow();
 
