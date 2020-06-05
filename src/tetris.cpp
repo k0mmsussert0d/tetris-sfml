@@ -2,6 +2,7 @@
 #include <time.h>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #include "const.hpp"
 #include "block.hpp"
@@ -67,10 +68,19 @@ int main() {
             }
         }
 
-        if (!game_paused && game_started && !game_over) {
+        if (game_started && !game_paused && !game_over) {
             if (timer > delay) { // move block down
 
-            auto full_lines_indices = fields.getFullLinesIndices();
+                auto full_lines_indices = fields.getFullLinesIndices();
+
+                if (!fields.validateBlock(block)) { // block hit the other block at its start position
+                    std::vector<Point> block_points = block.getPoints();
+                    if (std::any_of(block_points.cbegin(), block_points.cend(), [](const Point& p){ return p.y == 0; })) {
+                        game_over = true;
+                        fields.saveBlock(block);
+                        continue;
+                    }
+                }
 
                 if (full_lines_indices.size() > 0) {
                     gameStats.addLinesCleared(full_lines_indices.size());
@@ -84,7 +94,7 @@ int main() {
                     window.refreshWindow();
 
                     continue;
-                } else if (!block.moveY(1)) { //  block hit the bottom
+                } else if (!block.moveY(1)) { // block hit the bottom
                     fields.saveBlock(block);
                     block = blockFactory.getRandomBlock();
                 } else if (!fields.validateBlock(block)) {  // block hit the other block
@@ -104,7 +114,6 @@ int main() {
             }
         }
 
-
         if (!game_started) {
             window.drawBackground();
             window.displayGameStart();
@@ -117,6 +126,10 @@ int main() {
         if (game_paused) {
             window.displayPause();
         }
+
+        if (game_over) {
+            window.displayGameOver();
+        }
         
         gameStats.printStatsToWindow(renderWindow);
         
@@ -124,6 +137,7 @@ int main() {
 
         dx = none;
         rotate = false;
+
     }
     return 0;
 }
