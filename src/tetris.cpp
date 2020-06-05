@@ -22,13 +22,14 @@ int main() {
 
     Window window(renderWindow, bg_texture, tiles_texture);
 
-    bool rotate = false;
+    bool rotate = false, speed_up = false;
     DIR dx = none;
-    float timer = 0, delay = 0.3;
+    float step_timer = 0, move_timer = 0, delay = 0.3, move_delay = 0.1;
     bool game_paused = false, game_started = false, game_over = false;
     srand(time(0));
 
-    sf::Clock clock;
+    sf::Clock step_clock;
+    sf::Clock move_clock;
 
     Fields fields;
 
@@ -39,9 +40,12 @@ int main() {
 
     while (renderWindow.isOpen()) {
 
-        float time = clock.getElapsedTime().asSeconds();
-        clock.restart();
-        timer += time;
+        float step_time = step_clock.getElapsedTime().asSeconds();
+        float move_time = move_clock.getElapsedTime().asSeconds();
+        step_clock.restart();
+        move_clock.restart();
+        step_timer += step_time;
+        move_timer += move_time;
 
         sf::Event e;
         while (renderWindow.pollEvent(e)) {
@@ -55,7 +59,7 @@ int main() {
                  } else if (e.key.code == sf::Keyboard::Right) {
                      dx = right;
                  } else if (e.key.code == sf::Keyboard::Down) {
-                     timer += 0.3;
+                     speed_up = true;
                  } else if (e.key.code == sf::Keyboard::P) {
                      if (game_started) {
                          game_paused = !game_paused;
@@ -65,11 +69,21 @@ int main() {
                          game_started = true;
                      }
                  }
+            } else if (e.type == sf::Event::KeyReleased) {
+                if (dx) {
+                    dx = none;
+                } else if (speed_up) {
+                    speed_up = false;
+                }
             }
         }
 
+        if (speed_up) {
+            step_timer += 0.001;
+        }
+
         if (game_started && !game_paused && !game_over) {
-            if (timer > delay) { // move block down
+            if (step_timer > delay) { // move block down
 
                 auto full_lines_indices = fields.getFullLinesIndices();
 
@@ -102,12 +116,16 @@ int main() {
                     fields.saveBlock(block);
                     block = blockFactory.getRandomBlock();
                 }
-                timer = 0;
+                step_timer = 0;
             }
 
-            if (dx) { // move block sideways
-                block.moveX(dx);
+            if (move_timer > move_delay) {
+                if (dx) { // move block sideways
+                    block.moveX(dx);
+                }
+                move_timer = 0;
             }
+
 
             if (rotate) { // rotate block
                 block.rotate();
@@ -135,7 +153,6 @@ int main() {
         
         window.refreshWindow();
 
-        dx = none;
         rotate = false;
 
     }
