@@ -5,7 +5,7 @@
 #include <algorithm>
 
 Block::Block (std::vector<std::vector<int>> mappings, COLOR color) {
-    x_pos = 0;
+    x_pos = 4;
     y_pos = 0;
     active_variant_i = 0;
     this->color = color;
