@@ -7,12 +7,12 @@
 #include "block.hpp"
 #include "fields.hpp"
 #include "blockfactory.hpp"
+#include "stats.hpp"
 #include "const/colors.hpp"
 #include "const/dirs.hpp"
 
 using namespace sf;
 
-const std::string resourcesDir = "./resources/";
 
 void draw(RenderWindow&, Fields, Block, Texture, Texture);
 void draw_background(RenderWindow& window, Texture bg_texture);
@@ -44,6 +44,8 @@ int main() {
 
     BlockFactory blockFactory;
     Block block = blockFactory.getRandomBlock();
+
+    GameStats gameStats;
 
     while (window.isOpen()) {
 
@@ -80,6 +82,7 @@ int main() {
                     // add score etc.
                     for (auto &line_index : full_lines_indices) {
                         fields.removeLineOfIndex(line_index);
+                        gameStats.addLinesCleared(full_lines_indices.size());
                         draw(window, fields, block, bg_texture, tiles_texture);
                         continue;
                     }
@@ -104,6 +107,7 @@ int main() {
         }
 
         draw(window, fields, block, bg_texture, tiles_texture);
+        gameStats.printStatsToWindow(window);
         if (pause) {
             draw_paused_text(window);
         }

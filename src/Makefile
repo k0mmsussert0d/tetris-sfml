@@ -15,8 +15,8 @@ debug: tetris
 %.o: %.hpp
 	$(CC) -c $< -o $(ODIR)/$@ $(CFLAGS)
 
-tetris: tetris.o block.o blockfactory.o fields.o
-	$(CC) -o tetris $(ODIR)/tetris.o $(ODIR)/block.o $(ODIR)/blockfactory.o $(ODIR)/fields.o $(CFLAGS) $(LIBS)
+tetris: tetris.o block.o blockfactory.o fields.o stats.o
+	$(CC) -o tetris $(ODIR)/tetris.o $(ODIR)/block.o $(ODIR)/blockfactory.o $(ODIR)/fields.o $(ODIR)/stats.o $(CFLAGS) $(LIBS)
 
 clean:
 	@echo "**Removing object files and executable..."
