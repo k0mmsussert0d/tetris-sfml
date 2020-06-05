@@ -2,14 +2,10 @@
 #include "const.hpp"
 #include <SFML/Graphics.hpp>
 
-GameStats::GameStats() {
-    score = 0;
-    level = 0;
-    lines = 0;
-    time = 0;
-}
+GameStats::GameStats()
+    : score(0), level(0), lines(0), time(0) {}
 
-std::string GameStats::nums_dir = resourcesDir + "/nums";
+std::string GameStats::nums_dir = const_list.resources_dir + "/nums";
 
 int GameStats::getScore() {
     return score;
@@ -66,15 +62,15 @@ void GameStats::printStatsToWindow(sf::RenderWindow& window) {
 }
 
 void GameStats::printScore(sf::RenderWindow& window) {
-    printNumber(window, std::string(6 - std::to_string(score).length(), '0') + std::to_string(score), positions.score_x, positions.score_y);
+    printNumber(window, std::string(6 - std::to_string(score).length(), '0') + std::to_string(score), const_list.positions.score_x, const_list.positions.score_y);
 }
 
 void GameStats::printLevel(sf::RenderWindow& window) {
-    printNumber(window, std::to_string(level), positions.level_x, positions.level_y);
+    printNumber(window, std::to_string(level), const_list.positions.level_x, const_list.positions.level_y);
 }
 
 void GameStats::printLinesCleared(sf::RenderWindow& window) {
-    printNumber(window, std::to_string(lines), positions.lines_x, positions.lines_y);
+    printNumber(window, std::to_string(lines), const_list.positions.lines_x, const_list.positions.lines_y);
 }
 
 void GameStats::printNumber(sf::RenderWindow& window, std::string number, float x_pos, float y_pos) {

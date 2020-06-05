@@ -10,27 +10,16 @@
 #include "stats.hpp"
 #include "const/colors.hpp"
 #include "const/dirs.hpp"
-
-using namespace sf;
-
-
-void draw(RenderWindow&, Fields, Block, Texture, Texture);
-void draw_background(RenderWindow& window, Texture bg_texture);
-void draw_block(RenderWindow& window, Texture block_texture, Block block);
-void draw_color_points(RenderWindow& window, Texture block_texture, std::vector<PointColor> color_points);
-void draw_point(RenderWindow& window, Texture block_texture, Point point, COLOR color);
-void draw_paused_text(RenderWindow& window);
-
+#include "window.hpp"
 
 int main() {
-    RenderWindow window(VideoMode(534, 686), "Tetris");
+    sf::RenderWindow renderWindow(sf::VideoMode(534, 686), "Tetris");
+    sf::Texture tiles_texture;
+    tiles_texture.loadFromFile(const_list.resources_dir + "tiles1.png");
+    sf::Texture bg_texture;
+    bg_texture.loadFromFile(const_list.resources_dir + "bg.png");
 
-    Texture tiles_texture;
-    tiles_texture.loadFromFile(resourcesDir + "tiles1.png");
-    Sprite s(tiles_texture);
-
-    Texture bg_texture;
-    bg_texture.loadFromFile(resourcesDir + "bg.png");
+    Window window(renderWindow, bg_texture, tiles_texture);
 
     bool rotate = false;
     DIR dx = none;
@@ -38,7 +27,7 @@ int main() {
     bool pause = false;
     srand(time(0));
 
-    Clock clock;
+    sf::Clock clock;
 
     Fields fields;
 
@@ -47,27 +36,26 @@ int main() {
 
     GameStats gameStats;
 
-    while (window.isOpen()) {
+    while (renderWindow.isOpen()) {
 
-        s.setTextureRect(IntRect(block.color * 30, 0, 30, 30));
         float time = clock.getElapsedTime().asSeconds();
         clock.restart();
         timer += time;
 
-        Event e;
-        while (window.pollEvent(e)) {
-            if (e.type == Event::Closed) {
-                window.close();
-            } else if (e.type == Event::KeyPressed) {
-                 if (e.key.code == Keyboard::Up) {
+        sf::Event e;
+        while (renderWindow.pollEvent(e)) {
+            if (e.type == sf::Event::Closed) {
+                renderWindow.close();
+            } else if (e.type == sf::Event::KeyPressed) {
+                 if (e.key.code == sf::Keyboard::Up) {
                      rotate = true;
-                 } else if (e.key.code == Keyboard::Left) {
+                 } else if (e.key.code == sf::Keyboard::Left) {
                      dx = left;
-                 } else if (e.key.code == Keyboard::Right) {
+                 } else if (e.key.code == sf::Keyboard::Right) {
                      dx = right;
-                 } else if (e.key.code == Keyboard::Down) {
+                 } else if (e.key.code == sf::Keyboard::Down) {
                      timer += 0.3;
-                 } else if (e.key.code == Keyboard::P) {
+                 } else if (e.key.code == sf::Keyboard::P) {
                      pause = !pause;
                  }
             }
@@ -79,13 +67,17 @@ int main() {
             auto full_lines_indices = fields.getFullLinesIndices();
 
                 if (full_lines_indices.size() > 0) {
-                    // add score etc.
+                    gameStats.addLinesCleared(full_lines_indices.size());
+
                     for (auto &line_index : full_lines_indices) {
                         fields.removeLineOfIndex(line_index);
-                        gameStats.addLinesCleared(full_lines_indices.size());
-                        draw(window, fields, block, bg_texture, tiles_texture);
-                        continue;
                     }
+
+                    window.drawBackground();
+                    window.drawColorPoints(fields.getUsedFields());
+                    window.refreshWindow();
+
+                    continue;
                 } else if (!block.moveY(1)) { //  block hit the bottom
                     fields.saveBlock(block);
                     block = blockFactory.getRandomBlock();
@@ -106,65 +98,21 @@ int main() {
             }
         }
 
-        draw(window, fields, block, bg_texture, tiles_texture);
-        gameStats.printStatsToWindow(window);
+        window.drawBackground();
+        window.drawColorPoints(fields.getUsedFields());
+        window.drawBlock(block);
+        window.refreshWindow();
+
+        gameStats.printStatsToWindow(renderWindow);
+        
         if (pause) {
-            draw_paused_text(window);
+            // draw_paused_text(renderWindow);
         }
 
         dx = none;
         rotate = false;
 
-        window.display();
+        renderWindow.display();
     }
     return 0;
-}
-
-
-void draw(RenderWindow& window, Fields fields, Block block, Texture bg_texture, Texture block_texture) {
-    
-    draw_background(window, bg_texture);
-    draw_block(window, block_texture, block);
-    auto old_points = fields.getUsedFields();
-    draw_color_points(window, block_texture, old_points);
-}
-
-void draw_background(RenderWindow& window, Texture bg_texture) {
-    Sprite bg(bg_texture);
-
-    window.clear(Color::White);
-    window.draw(bg);
-}
-
-void draw_block(RenderWindow& window, Texture block_texture, Block block) {
-    auto points = block.getPoints();
-    for (const auto &p : points) {
-        draw_point(window, block_texture, p, block.color);
-    }
-}
-
-void draw_color_points(RenderWindow& window, Texture block_texture, std::vector<PointColor> color_points) {
-    for (const auto &p : color_points) {
-        draw_point(window, block_texture, p.point, p.color);
-    }
-}
-
-void draw_point(RenderWindow& window, Texture block_texture, Point point, COLOR color) {
-    Sprite tile(block_texture);
-    tile.setTextureRect(IntRect(color * 30, 0, 30, 30));
-    tile.setPosition(point.x * 30 + x_offset, point.y * 30 + y_offset);
-    window.draw(tile);
-}
-
-void draw_paused_text(RenderWindow& window) {
-    Text paused_text;
-    Font font;
-    font.loadFromFile(resourcesDir + "/DejaVuSans.ttf");
-    paused_text.setFont(font);
-    paused_text.setString("[P]aused");
-    paused_text.setCharacterSize(48);
-    paused_text.setFillColor(Color::Red);
-    paused_text.setStyle(Text::Bold);
-    paused_text.setPosition(70, 200);
-    window.draw(paused_text);
 }
