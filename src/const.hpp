@@ -8,14 +8,14 @@ const struct Const {
     const std::string resources_dir = "./resources/";
 
     const struct Positions {
-        int level_x = 400;
-        int level_y = 130;
+        int level_x = 357;
+        int level_y = 28;
 
-        int lines_x = 400;
-        int lines_y = 70;
+        int lines_x = 357;
+        int lines_y = 179;
 
-        int score_x = 347;
-        int score_y = 200;
+        int score_x = 357;
+        int score_y = 103;
     } positions;
 } const_list;
 
