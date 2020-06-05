@@ -24,12 +24,11 @@ int main() {
 
     bool rotate = false, speed_up = false;
     DIR dx = none;
-    float step_timer = 0, move_timer = 0, delay = 0.3, move_delay = 0.1;
+    float step_timer = 0, move_timer = 0, delay = 0.3;;
     bool game_paused = false, game_started = false, game_over = false;
     srand(time(0));
 
     sf::Clock step_clock;
-    sf::Clock move_clock;
 
     Fields fields;
 
@@ -41,11 +40,8 @@ int main() {
     while (renderWindow.isOpen()) {
 
         float step_time = step_clock.getElapsedTime().asSeconds();
-        float move_time = move_clock.getElapsedTime().asSeconds();
         step_clock.restart();
-        move_clock.restart();
         step_timer += step_time;
-        move_timer += move_time;
 
         sf::Event e;
         while (renderWindow.pollEvent(e)) {
@@ -70,9 +66,7 @@ int main() {
                      }
                  }
             } else if (e.type == sf::Event::KeyReleased) {
-                if (dx) {
-                    dx = none;
-                } else if (speed_up) {
+                if (speed_up) {
                     speed_up = false;
                 }
             }
@@ -111,7 +105,7 @@ int main() {
                 } else if (!block.moveY(1)) { // block hit the bottom
                     fields.saveBlock(block);
                     block = blockFactory.getRandomBlock();
-                } else if (!fields.validateBlock(block)) {  // block hit the other block
+                } else if (!fields.validateBlock(block)) {  // block hit the other block from top
                     block.moveY(-1);
                     fields.saveBlock(block);
                     block = blockFactory.getRandomBlock();
@@ -119,16 +113,21 @@ int main() {
                 step_timer = 0;
             }
 
-            if (move_timer > move_delay) {
-                if (dx) { // move block sideways
-                    block.moveX(dx);
+            if (rotate) { // rotate block
+                Block rotated = block;
+                rotated.rotate();
+
+                if (fields.validateBlock(rotated)) {
+                    block.rotate();
                 }
-                move_timer = 0;
             }
 
+            if (dx) {
+                block.moveX(dx);
 
-            if (rotate) { // rotate block
-                block.rotate();
+                if(!fields.validateBlock(block)) { // block hit other block from the side
+                    block.moveX(-dx);
+                }
             }
         }
 
@@ -154,6 +153,7 @@ int main() {
         window.refreshWindow();
 
         rotate = false;
+        dx = none;
 
     }
     return 0;
