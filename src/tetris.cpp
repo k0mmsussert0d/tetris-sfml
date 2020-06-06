@@ -15,6 +15,8 @@
 
 int main() {
     sf::RenderWindow renderWindow(sf::VideoMode(534, 686), "Tetris");
+    renderWindow.setVerticalSyncEnabled(true);
+    renderWindow.setFramerateLimit(30);
     sf::Texture tiles_texture;
     tiles_texture.loadFromFile(const_list.resources_dir + "tiles1.png");
     sf::Texture bg_texture;
@@ -73,7 +75,7 @@ int main() {
         }
 
         if (speed_up) {
-            step_timer += 0.001;
+            step_timer += 0.2;
         }
 
         if (game_started && !game_paused && !game_over) {
