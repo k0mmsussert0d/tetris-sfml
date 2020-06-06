@@ -18,7 +18,7 @@ int main() {
     renderWindow.setVerticalSyncEnabled(true);
     renderWindow.setFramerateLimit(30);
     sf::Texture tiles_texture;
-    tiles_texture.loadFromFile(const_list.resources_dir + "tiles1.png");
+    tiles_texture.loadFromFile(const_list.resources_dir + "tiles.png");
     sf::Texture bg_texture;
     bg_texture.loadFromFile(const_list.resources_dir + "bg.png");
 
