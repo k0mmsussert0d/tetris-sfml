@@ -4,6 +4,8 @@
 #include <vector>
 #include <map>
 
+#include "const/colors.hpp"
+
 struct Point {
     int x;
     int y;
@@ -21,11 +23,12 @@ class Block {
         int y_pos;
         bool validate_move();
     public:
-        Block(std::vector<std::vector<int>> mappings);
+        Block(std::vector<std::vector<int>>, COLOR);
         std::vector<Point> getPoints();
-        void moveX(int);
-        void moveY(int);
-        void rotate();
+        COLOR color;
+        bool moveX(int);
+        bool moveY(int);
+        bool rotate();
 };
 
 #endif // BLOCK_HPP

@@ -1,28 +1,25 @@
 #ifndef CONST_HPP
 #define CONST_HPP
 
-#include "block.hpp"
+const struct Const {
+    const int point_size = 30;
+    const int x_offset = 28;
+    const int y_offset = 28;
+    const std::string resources_dir = "./resources/";
 
-#include <vector>
+    const struct Positions {
+        int level_x = 357;
+        int level_y = 28;
 
-const int x_offset = 28;
-const int y_offset = 28;
+        int lines_x = 357;
+        int lines_y = 179;
 
-const Block I ({{4, 5, 6, 7},      {2, 6, 10, 14},     {8, 9, 10, 11},     {1, 5, 9, 13}});
-const Block Z ({{0, 1, 5, 6},      {2, 5, 6, 9},       {4, 5, 9, 10},      {5, 8, 9, 12}});
-const Block S ({{1, 2, 4, 5},      {1, 5, 6, 10},      {5, 6, 8, 9},       {0, 4, 5, 9}});
-const Block T ({{1, 4, 5, 6},      {1, 5, 6, 9},       {4, 5, 6, 9},       {1, 4, 5, 9}});
-const Block L ({{2, 4, 5, 6},      {1, 5, 9, 10},      {4, 5, 6, 8},       {0, 1, 5, 9}});
-const Block J ({{0, 4, 5, 6},      {1, 2, 5, 9},       {4, 5, 6, 10},      {1, 5, 8, 9}});
-const Block O ({{1, 2, 5, 6}});
+        int score_x = 357;
+        int score_y = 103;
 
-std::vector<Block> figures = {I, Z, S, T, L, J, O};
-
-
-enum DIR {
-    left = -1,
-    none,
-    right
-};
+        int com_x = 48;
+        int com_y = 253;
+    } positions;
+} const_list;
 
 #endif // CONST_HPP
